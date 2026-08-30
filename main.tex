@@ -1,0 +1,217 @@
+\documentclass{article}
+
+\ExplSyntaxOn
+% The +m argument explicitly allows paragraph breaks (empty lines)
+\NewDocumentCommand{\DefineTracklist}{ m +m }{
+    % Store the raw input list into a temporary variable
+    \tl_set:Nn \l_tmpa_tl { #2 }
+    % Find all \par (empty lines) and replace them with nothing
+    \tl_replace_all:Nnn \l_tmpa_tl { \par } { }
+    % Assign the cleaned list to the macro name you provided
+    \tl_set_eq:NN #1 \l_tmpa_tl
+}
+\ExplSyntaxOff
+\input{config.tex}
+
+\usepackage[a4paper,margin=0pt]{geometry}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{amsmath}
+\usepackage[AutoFakeBold,AutoFakeSlant]{xeCJK}
+
+% Setup the CJK font from the local directory
+\setCJKmainfont{SourceHanSerifCN-Regular.ttf}[
+  Path = fonts/,
+  BoldFont = SourceHanSerifCN-Bold.ttf,
+  ItalicFont = SourceHanSerifCN-Regular.ttf
+]
+
+\begin{document}
+\pagestyle{empty}
+
+% ==========================================
+% PAGE 1: FRONT SIDE (OUTSIDE OF SLEEVE)
+% ==========================================
+\begin{tikzpicture}[overlay, remember picture]
+    % Origin is at the bottom-left of the A4 page
+    \coordinate (BL) at (current page.south west);
+
+    % ------------------------------------------
+    % Draw Fold Lines (Dashed)
+    % ------------------------------------------
+    \draw[dashed, thick, gray] ([xshift=4.5cm]BL) -- ++(0, 24);
+    \draw[dashed, thick, gray] ([xshift=16.5cm]BL) -- ++(0, 24);
+    \draw[dashed, thick, gray] ([yshift=12.0cm]BL) -- ++(21, 0);
+    \draw[dashed, thick, gray] ([xshift=4.5cm, yshift=24.0cm]BL) -- ++(12, 0);
+
+    % ------------------------------------------
+    % Draw Cut Lines (Solid, Black)
+    % ------------------------------------------
+    \draw[dashed, thick, gray] ([yshift=24cm]BL) -- ([xshift=4.5cm, yshift=24cm]BL) 
+        -- ([xshift=7.35cm, yshift=29.7cm]BL) -- ([xshift=13.65cm, yshift=29.7cm]BL) 
+        -- ([xshift=16.5cm, yshift=24cm]BL) -- ([xshift=21cm, yshift=24cm]BL);
+
+    % ------------------------------------------
+    % 1. Front Cover (Center 12cm x 12cm)
+    % ------------------------------------------
+    \begin{scope}[shift={($(BL)+(10.5cm, 16.5cm)$)}]
+        \newcommand{\AlbumCoverPlaceholder}{
+            \draw[thick] (-5, -3.0) rectangle (5, 7.0);
+            \draw[dashed, gray] (-5, -3.0) -- (5, 7.0);
+            \draw[dashed, gray] (-5, 7.0) -- (5, -3.0);
+            \node[fill=white, inner sep=4pt, align=center] at (0, 3.0) 
+            {\normalsize \textbf{Album Cover}\\[0.5em] \normalsize \textbf{专辑封面}};
+            \node[fill=white, inner sep=4pt] at (0, 1.0) {($10\text{cm} \times 10\text{cm}$ Placeholder)};
+        }
+
+        \ifx\AlbumCoverPath\empty
+            \AlbumCoverPlaceholder
+        \else
+            \IfFileExists{\AlbumCoverPath}{
+                \node[inner sep=0pt] at (0, 2.0) {\includegraphics[width=10cm, height=10cm]{\AlbumCoverPath}};
+            }{
+                \AlbumCoverPlaceholder
+            }
+        \fi
+
+        \ifx\AlbumName\empty
+            \node[anchor=west] at (-5.0, -3.5) {\normalsize Album name \\[0.5em] 专辑名称};
+        \else
+            \node[anchor=west] at (-5.0, -3.5) {\normalsize \AlbumName};
+        \fi
+        
+        \ifx\AlbumAuthors\empty
+            \node[anchor=west] at (-5.0, -4.0) {\normalsize Album authors \\[0.5em] 艺术家};
+        \else
+            \node[anchor=west] at (-5.0, -4.0) {\normalsize \AlbumAuthors};
+        \fi
+    \end{scope}
+
+    % ------------------------------------------
+    % 2. Bottom Panel (Back Cover - Tracklist)
+    % Using 'transform shape' correctly rotates the text content
+    % ------------------------------------------
+    \begin{scope}[shift={($(BL)+(10.5cm, 6.0cm)$)}, rotate=180, transform shape]
+        \node[align=center] at (0, 4.2) {\Large \textbf{Tracklist}\\[0.3em] \Large \textbf{曲目列表}};
+        \draw[thick] (-4.5, -4.5) rectangle (4.5, 3.2);
+        
+        \ifx\TrackList\empty
+            % Generate 4 track lines
+            \foreach \y [count=\i] in {1.8, 0.3, -1.2, -2.7} {
+                \node[anchor=west] at (-4, \y) {\textbf{0\i}};
+                \draw[thick] (-3.2, \y - 0.15) -- (4, \y - 0.15);
+            }
+        \else
+            % Nested scope to clip the overflow text
+            \begin{scope}
+                % Anything drawn after this clip command within this scope will be hidden if it exceeds the rectangle
+                \clip (-4.5, -4.5) rectangle (4.5, 3.2);
+                \foreach \Track [count=\i] in \TrackList {
+                    % Calculate Y-coordinate for even distribution. 
+                    % top starting position - N * step gap between lines
+                    \pgfmathsetmacro{\y}{2.5 - (\i-1)*0.8}
+                    % Track Number: uses \normalsize, checks if <10 to add a leading zero (01, 02, etc.)
+                    \node[anchor=west, font=\normalsize] at (-4, \y) {\textbf{\ifnum\i<10 0\fi\i}};
+                     % Track Name: uses \normalsize text
+                    \node[anchor=west, font=\normalsize] at (-3.2, \y) {\Track};
+                    % Divider Line: drawn slightly below the text baseline
+                    \draw[thick] (-3.2, \y - 0.25) -- (4, \y - 0.25);
+                    \xdef\TotalTracks{\i}
+                }
+            \end{scope}
+            \ifnum\TotalTracks>9
+                \node[anchor=west, font=\normalsize] at (-3.2, -4.9) {更多 \\[0.5em] More ...};
+            \fi
+        \fi
+    \end{scope}
+
+    % ------------------------------------------
+    % 3. Top Flap (Closing Flap)
+    % ------------------------------------------
+    \begin{scope}[shift={($(BL)+(10.5cm, 26.85cm)$)}, rotate=180, transform shape]
+        \node[align=center] at (0, 1.2) {\large \textbf{Top Flap}};
+        \node[align=center] at (0, 0.4) {Fold backward and tuck into side flaps to close.};
+        \node[align=center] at (0, -0.6) {\large \textbf{顶部封口}};
+        \node[align=center] at (0, -1.4) {向后折叠并插入侧边折翼以封口。};
+    \end{scope}
+\end{tikzpicture}
+
+\newpage
+
+% ==========================================
+% PAGE 2: BACK SIDE (INSIDE OF SLEEVE)
+% Designed for Duplex Printing (Flip on Long Edge)
+% ==========================================
+\begin{tikzpicture}[overlay, remember picture]
+    \coordinate (BL2) at (current page.south west);
+
+    % Light dashed lines on the back to help show where the folds are
+    \draw[dashed, thick, lightgray] ([xshift=4.5cm]BL2) -- ++(0, 24);
+    \draw[dashed, thick, lightgray] ([xshift=16.5cm]BL2) -- ++(0, 24);
+    \draw[dashed, thick, lightgray] ([yshift=12.0cm]BL2) -- ++(21, 0);
+    \draw[dashed, thick, lightgray] ([xshift=4.5cm, yshift=24.0cm]BL2) -- ++(12, 0);
+
+    % Solid lines for cut lines on the back
+    \draw[solid, thick, black] ([yshift=24cm]BL2) -- ([xshift=4.5cm, yshift=24cm]BL2) 
+        -- ([xshift=7.35cm, yshift=29.7cm]BL2) -- ([xshift=13.65cm, yshift=29.7cm]BL2) 
+        -- ([xshift=16.5cm, yshift=24cm]BL2) -- ([xshift=21cm, yshift=24cm]BL2);
+    
+    % Fold Line Labels
+    \node[anchor=west, align=left] at ([yshift=12cm]BL) {\footnotesize Fold line\\[-0.2em]\footnotesize 折叠线};
+    \node[anchor=west, align=left] at ([yshift=24cm]BL) {\footnotesize Cut line\\[-0.2em]\footnotesize 剪切线};
+    \node[anchor=east, align=right] at ([xshift=21cm, yshift=12cm]BL) {\footnotesize Fold line\\[-0.2em]\footnotesize 折叠线};
+    \node[anchor=east, align=right] at ([xshift=21cm, yshift=24cm]BL) {\footnotesize Cut line\\[-0.2em]\footnotesize 剪切线};
+    \node[anchor=north, align=center] at ([xshift=4.5cm, yshift=24cm]BL) {\footnotesize Fold line\\[-0.2em]\footnotesize 折叠线};
+    \node[anchor=north, align=center] at ([xshift=16.5cm, yshift=24cm]BL) {\footnotesize Fold line\\[-0.2em]\footnotesize 折叠线};
+    \node[anchor=south, align=center] at ([xshift=4.5cm]BL) {\footnotesize Fold line\\[-0.2em]\footnotesize 折叠线};
+    \node[anchor=south, align=center] at ([xshift=16.5cm]BL) {\footnotesize Fold line\\[-0.2em]\footnotesize 折叠线};
+
+    % ------------------------------------------
+    % Standard Info (Prints on the back of the Right Flap)
+    % ------------------------------------------
+    \begin{scope}[shift={($(BL2)+(10.5cm, 8.0cm)$)}]
+        % Explicitly rotating the node so the text aligns along the narrow flap
+        \node[] at (0, 0) {
+            \parbox{10.5cm}{
+                \centering
+                \Large \textbf{CD Envelope}\\[0.8em]
+                \normalsize
+                Standard CD Size: 12cm $\times$ 12cm\\[1em]
+                \textit{This flap folds inside the envelope and will be hidden.}\\[2.5em]
+                
+                \Large \textbf{光盘信封}\\[0.8em]
+                \normalsize
+                标准光盘尺寸: 12cm $\times$ 12cm\\[1em]
+                \textit{此折翼将折叠至信封内部被隐藏。}
+            }
+        };
+    \end{scope}
+
+    % ------------------------------------------
+    % Folding Instructions (Prints on the back of the Left Flap)
+    % ------------------------------------------
+    \begin{scope}[shift={($(BL2)+(10.5cm, 18.0cm)$)}]
+        \node[] at (0, 0) {
+            \parbox{10.5cm}{
+                \Large \textbf{Folding Instructions:}\\[0.5em]
+                \normalsize
+                1. Lay this paper flat with the main design (Page 1) facing \textbf{UP}.\\
+                2. Fold the Left and Right flaps \textbf{BACKWARD}.\\
+                3. Place the CD in the center square.\\
+                4. Fold the Bottom panel \textbf{BACKWARD} to create a pocket securing the CD.\\
+                5. Fold the Top flap \textbf{BACKWARD} and tuck it into the side flaps.\\[1.5em]
+                
+                \Large \textbf{折叠说明：}\\[0.5em]
+                \normalsize
+                1. 将此纸张平放，主图案面（第一页）朝上。\\
+                2. 将左右两侧的折翼\textbf{向后}折叠。\\
+                3. 将光盘放在中间的正方形内。\\
+                4. 将底部面板\textbf{向后}折叠，形成固定光盘的口袋。\\
+                5. 将顶部封口\textbf{向后}折叠，并将其塞入两侧折翼中。
+            }
+        };
+    \end{scope}
+
+\end{tikzpicture}
+
+\end{document}
