@@ -1,0 +1,31 @@
+\usepackage[AutoFakeBold,AutoFakeSlant]{xeCJK}
+
+% Setup the CJK font from the local directory
+\setCJKmainfont{SourceHanSerifCN-Regular.ttf}[
+  Path = fonts/,
+  BoldFont = SourceHanSerifCN-Bold.ttf,
+  ItalicFont = SourceHanSerifCN-Regular.ttf
+]
+
+\newcommand{\AlbumCoverText}{（10cm $\times$ 10cm 专辑封面）}
+\newcommand{\AlbumNameText}{专辑名称}
+\newcommand{\AlbumAuthorsText}{艺术家}
+\newcommand{\TrackListText}{曲目列表}
+\newcommand{\More}{更多}
+\newcommand{\TopFoldI}{顶部封口}
+\newcommand{\TopFoldII}{向后折叠并插入侧边折翼以封口。}
+\newcommand{\CutLine}{剪切线}
+\newcommand{\FoldLine}{折叠线}
+\newcommand{\EnvelopeI}{光盘信封}
+\newcommand{\EnvelopeII}{%
+    标准光盘尺寸: 12cm $\times$ 12cm\\[1em]
+    \textit{此折翼将折叠至信封内部被隐藏。}\\[2.5em]
+}
+\newcommand{\InstructionI}{折叠说明：}
+\newcommand{\InstructionII}{%
+    1. 将此纸张平放，主图案面（第一页）朝上。\\
+    2. 将左右两侧的折翼\textbf{向后}折叠。\\
+    3. 将光盘放在中间的正方形内。\\
+    4. 将底部面板\textbf{向后}折叠，形成固定光盘的口袋。\\
+    5. 将顶部封口\textbf{向后}折叠，并将其塞入两侧折翼中。\\[1.5em]
+}

@@ -17,14 +17,7 @@
 \usepackage{tikz}
 \usetikzlibrary{calc}
 \usepackage{amsmath}
-\usepackage[AutoFakeBold,AutoFakeSlant]{xeCJK}
-
-% Setup the CJK font from the local directory
-\setCJKmainfont{SourceHanSerifCN-Regular.ttf}[
-  Path = fonts/,
-  BoldFont = SourceHanSerifCN-Bold.ttf,
-  ItalicFont = SourceHanSerifCN-Regular.ttf
-]
+\input{langs/\LangCode.tex}
 
 \begin{document}
 \pagestyle{empty}
@@ -59,9 +52,8 @@
             \draw[thick] (-5, -3.0) rectangle (5, 7.0);
             \draw[dashed, gray] (-5, -3.0) -- (5, 7.0);
             \draw[dashed, gray] (-5, 7.0) -- (5, -3.0);
-            \node[fill=white, inner sep=4pt, align=center] at (0, 3.0) 
-            {\normalsize \textbf{Album Cover}\\[0.5em] \normalsize \textbf{专辑封面}};
-            \node[fill=white, inner sep=4pt] at (0, 1.0) {($10\text{cm} \times 10\text{cm}$ Placeholder)};
+            \node[fill=white, align=center] at (0, 2.0) 
+            {\normalsize \textbf{\AlbumCoverText}};
         }
 
         \ifx\AlbumCoverPath\empty
@@ -75,13 +67,13 @@
         \fi
 
         \ifx\AlbumName\empty
-            \node[anchor=west] at (-5.0, -3.5) {\normalsize Album name \\[0.5em] 专辑名称};
+            \node[anchor=west] at (-5.0, -3.5) {\normalsize \AlbumNameText};
         \else
             \node[anchor=west] at (-5.0, -3.5) {\normalsize \AlbumName};
         \fi
         
         \ifx\AlbumAuthors\empty
-            \node[anchor=west] at (-5.0, -4.0) {\normalsize Album authors \\[0.5em] 艺术家};
+            \node[anchor=west] at (-5.0, -4.0) {\normalsize \AlbumAuthorsText};
         \else
             \node[anchor=west] at (-5.0, -4.0) {\normalsize \AlbumAuthors};
         \fi
@@ -92,7 +84,7 @@
     % Using 'transform shape' correctly rotates the text content
     % ------------------------------------------
     \begin{scope}[shift={($(BL)+(10.5cm, 6.0cm)$)}, rotate=180, transform shape]
-        \node[align=center] at (0, 4.2) {\Large \textbf{Tracklist}\\[0.3em] \Large \textbf{曲目列表}};
+        \node[align=center] at (0, 4.2) {\Large \textbf{\TrackListText}};
         \draw[thick] (-4.5, -4.5) rectangle (4.5, 3.2);
         
         \ifx\TrackList\empty
@@ -120,7 +112,7 @@
                 }
             \end{scope}
             \ifnum\TotalTracks>9
-                \node[anchor=west, font=\normalsize] at (-3.2, -4.9) {更多 \\[0.5em] More ...};
+                \node[anchor=west, font=\normalsize] at (-3.2, -4.9) {\More ...};
             \fi
         \fi
     \end{scope}
@@ -129,10 +121,8 @@
     % 3. Top Flap (Closing Flap)
     % ------------------------------------------
     \begin{scope}[shift={($(BL)+(10.5cm, 26.85cm)$)}, rotate=180, transform shape]
-        \node[align=center] at (0, 1.2) {\large \textbf{Top Flap}};
-        \node[align=center] at (0, 0.4) {Fold backward and tuck into side flaps to close.};
-        \node[align=center] at (0, -0.6) {\large \textbf{顶部封口}};
-        \node[align=center] at (0, -1.4) {向后折叠并插入侧边折翼以封口。};
+        \node[align=center] at (0, -0.6) {\large \textbf{\TopFoldI}};
+        \node[align=center] at (0, -1.4) {\TopFoldII};
     \end{scope}
 \end{tikzpicture}
 
@@ -157,14 +147,14 @@
         -- ([xshift=16.5cm, yshift=24cm]BL2) -- ([xshift=21cm, yshift=24cm]BL2);
     
     % Fold Line Labels
-    \node[anchor=west, align=left] at ([yshift=12cm]BL) {\footnotesize Fold line\\[-0.2em]\footnotesize 折叠线};
-    \node[anchor=west, align=left] at ([yshift=24cm]BL) {\footnotesize Cut line\\[-0.2em]\footnotesize 剪切线};
-    \node[anchor=east, align=right] at ([xshift=21cm, yshift=12cm]BL) {\footnotesize Fold line\\[-0.2em]\footnotesize 折叠线};
-    \node[anchor=east, align=right] at ([xshift=21cm, yshift=24cm]BL) {\footnotesize Cut line\\[-0.2em]\footnotesize 剪切线};
-    \node[anchor=north, align=center] at ([xshift=4.5cm, yshift=24cm]BL) {\footnotesize Fold line\\[-0.2em]\footnotesize 折叠线};
-    \node[anchor=north, align=center] at ([xshift=16.5cm, yshift=24cm]BL) {\footnotesize Fold line\\[-0.2em]\footnotesize 折叠线};
-    \node[anchor=south, align=center] at ([xshift=4.5cm]BL) {\footnotesize Fold line\\[-0.2em]\footnotesize 折叠线};
-    \node[anchor=south, align=center] at ([xshift=16.5cm]BL) {\footnotesize Fold line\\[-0.2em]\footnotesize 折叠线};
+    \node[anchor=north west] at ([yshift=12cm]BL) {\footnotesize \FoldLine};
+    \node[anchor=north west] at ([yshift=24cm]BL) {\footnotesize \CutLine}; 
+    \node[anchor=north east] at ([xshift=21cm, yshift=12cm]BL) {\footnotesize \FoldLine};
+    \node[anchor=north east] at ([xshift=21cm, yshift=24cm]BL) {\footnotesize \CutLine};
+    \node[anchor=north] at ([xshift=4.5cm, yshift=24cm]BL) {\footnotesize \FoldLine};
+    \node[anchor=north] at ([xshift=16.5cm, yshift=24cm]BL) {\footnotesize \FoldLine};
+    \node[anchor=south] at ([xshift=4.5cm]BL) {\footnotesize \FoldLine};
+    \node[anchor=south] at ([xshift=16.5cm]BL) {\footnotesize \FoldLine};
 
     % ------------------------------------------
     % Standard Info (Prints on the back of the Right Flap)
@@ -174,15 +164,9 @@
         \node[] at (0, 0) {
             \parbox{10.5cm}{
                 \centering
-                \Large \textbf{CD Envelope}\\[0.8em]
+                \Large \textbf{\EnvelopeI}\\[0.8em]
                 \normalsize
-                Standard CD Size: 12cm $\times$ 12cm\\[1em]
-                \textit{This flap folds inside the envelope and will be hidden.}\\[2.5em]
-                
-                \Large \textbf{光盘信封}\\[0.8em]
-                \normalsize
-                标准光盘尺寸: 12cm $\times$ 12cm\\[1em]
-                \textit{此折翼将折叠至信封内部被隐藏。}
+                \EnvelopeII
             }
         };
     \end{scope}
@@ -193,21 +177,9 @@
     \begin{scope}[shift={($(BL2)+(10.5cm, 18.0cm)$)}]
         \node[] at (0, 0) {
             \parbox{10.5cm}{
-                \Large \textbf{Folding Instructions:}\\[0.5em]
+                \Large \textbf{\InstructionI}\\[0.5em]
                 \normalsize
-                1. Lay this paper flat with the main design (Page 1) facing \textbf{UP}.\\
-                2. Fold the Left and Right flaps \textbf{BACKWARD}.\\
-                3. Place the CD in the center square.\\
-                4. Fold the Bottom panel \textbf{BACKWARD} to create a pocket securing the CD.\\
-                5. Fold the Top flap \textbf{BACKWARD} and tuck it into the side flaps.\\[1.5em]
-                
-                \Large \textbf{折叠说明：}\\[0.5em]
-                \normalsize
-                1. 将此纸张平放，主图案面（第一页）朝上。\\
-                2. 将左右两侧的折翼\textbf{向后}折叠。\\
-                3. 将光盘放在中间的正方形内。\\
-                4. 将底部面板\textbf{向后}折叠，形成固定光盘的口袋。\\
-                5. 将顶部封口\textbf{向后}折叠，并将其塞入两侧折翼中。
+                \InstructionII
             }
         };
     \end{scope}
