@@ -94,25 +94,39 @@
                 \draw[thick] (-3.2, \y - 0.15) -- (4, \y - 0.15);
             }
         \else
-            % Nested scope to clip the overflow text
+            % Configuration controls (defaults; can be overridden in config.tex)
+            \providecommand{\TrackCols}{2}          % Set 1 for single column, 2 for two columns
+            \providecommand{\TrackStep}{0.48}       % Vertical row gap in cm (e.g., 0.45 to 0.70)
+            \providecommand{\TrackFontSize}{\small} % \normalsize, \small, or \footnotesize
+            % Calculate how many rows fit inside the ~6.8cm vertical box height
+            \pgfmathtruncatemacro{\TracksPerCol}{floor(6.8 / \TrackStep)}
+            \pgfmathtruncatemacro{\MaxTracks}{\TracksPerCol * \TrackCols}
             \begin{scope}
-                % Anything drawn after this clip command within this scope will be hidden if it exceeds the rectangle
                 \clip (-4.5, -4.5) rectangle (4.5, 3.2);
                 \foreach \Track [count=\i] in \TrackList {
-                    % Calculate Y-coordinate for even distribution. 
-                    % top starting position - N * step gap between lines
-                    \pgfmathsetmacro{\y}{2.5 - (\i-1)*0.8}
-                    % Track Number: uses \normalsize, checks if <10 to add a leading zero (01, 02, etc.)
-                    \node[anchor=west, font=\normalsize] at (-4, \y) {\textbf{\ifnum\i<10 0\fi\i}};
-                     % Track Name: uses \normalsize text
-                    \node[anchor=west, font=\normalsize] at (-3.2, \y) {\Track};
-                    % Divider Line: drawn slightly below the text baseline
-                    \draw[thick] (-3.2, \y - 0.25) -- (4, \y - 0.25);
+                    % Compute row and column coordinates
+                    \ifnum\TrackCols=2
+                        \pgfmathtruncatemacro{\col}{(\i-1) / \TracksPerCol}
+                        \pgfmathtruncatemacro{\row}{mod(\i-1, \TracksPerCol)}
+                        \pgfmathsetmacro{\xnum}{-4.2 + \col * 4.4}
+                        \pgfmathsetmacro{\xtext}{-3.5 + \col * 4.4}
+                        \pgfmathsetmacro{\xend}{-0.2 + \col * 4.4}
+                    \else
+                        \pgfmathtruncatemacro{\col}{0}
+                        \pgfmathtruncatemacro{\row}{\i-1}
+                        \pgfmathsetmacro{\xnum}{-4.0}
+                        \pgfmathsetmacro{\xtext}{-3.2}
+                        \pgfmathsetmacro{\xend}{4.0}
+                    \fi
+                    \pgfmathsetmacro{\y}{2.6 - \row * \TrackStep}
+                    % Track Number & Track Name
+                    \node[anchor=west, font=\TrackFontSize] at (\xnum, \y) {\textbf{\ifnum\i<10 0\fi\i}};
+                    \node[anchor=west, font=\TrackFontSize] at (\xtext, \y) {\Track};
                     \xdef\TotalTracks{\i}
                 }
             \end{scope}
-            \ifnum\TotalTracks>9
-                \node[anchor=west, font=\normalsize] at (-3.2, -4.9) {\More ...};
+            \ifnum\TotalTracks>\MaxTracks
+                \node[anchor=center, font=\TrackFontSize] at (0, -4.9) {\More ...};
             \fi
         \fi
     \end{scope}
