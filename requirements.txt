@@ -1,0 +1,12 @@
+amsfonts
+amsmath
+geometry
+graphics
+graphics-cfg
+graphics-def
+iftex
+kpathsea
+l3backend
+latex
+pgf
+xcolor

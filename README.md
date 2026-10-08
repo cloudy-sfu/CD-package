@@ -10,6 +10,14 @@ In PowerShell, let the current directory be the program's root directory.
 
 Depending on the language of the template to use, run the following command. If target language is not mentioned, do nothing.
 
+Run the following command in PowerShell.
+
+```
+$packages = Get-Content requirements_en.txt | Where-Object { $_.Trim() -ne "" }
+tlmgr install $packages
+tlmgr path add
+```
+
 ---
 
 **Chinese (simplified)**
@@ -19,7 +27,6 @@ Depending on the language of the template to use, run the following command. If 
 ```
 
 ---
-
 
 
 ## Usage
